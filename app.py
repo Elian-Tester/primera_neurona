@@ -23,17 +23,20 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         results = []
         entradas = []
         salida = []
-        with open('entrada.csv') as File:
+        with open('201241.csv') as File:
             reader = csv.DictReader(File)
             for row in reader:
-                entradas.append( [1, row['x1'], row['x2']])
-                salida.append( [ row['y'] ] )
+                print(row)
+                entradas.append( [int(row['x1']), int(row[' x2']), int(row[' x3']), int(row[' x4']), int(row[' x5'])])
+                salida.append( [ int(row[' y']) ] )
 
                 print(row)
             
             #print (results)        
         datosCsv = {"X": entradas, "Y": salida}
-        modeloNeurona.inicializarDatos(datosCsv)
+        finalW = modeloNeurona.inicializarDatos(datosCsv)
+
+        self.labelWfinal.setText( str(finalW) )
         
 
 
