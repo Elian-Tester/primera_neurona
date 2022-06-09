@@ -41,7 +41,8 @@ def inicializarDatos(datosCsv):
     
     ycTensor = tensorFlow1(datosCsv["X"], datosCsv["Y"], eP)
     graficar(datosGraficar[1]["Epocas"] , datosGraficar[1]["eEpoca"], datosGraficar[1]["eP"], datosGraficar[1]["cont"], datosGraficar[1]["W"])
-    graficarComparacion(datosGraficar[0]["Epoca"], datosGraficar[0]["Y"] ,datosGraficar[0]["YcFinal"], ycTensor)
+    graficarComparacion(datosGraficar[0]["Epoca"], datosGraficar[0]["Y"] ,datosGraficar[0]["YcFinal"], ycTensor[0])
+    graficarTensor(ycTensor[1], ycTensor[2], ycTensor[3])
 
     return "vacio"
 
@@ -147,7 +148,6 @@ def tensorFlow1(X, Y, eP):
     
     histor = modelo.fit(np.array(X, float), np.array(Y, float), epochs=epoca, verbose=False)    
     
-    grafiTensor = plt.figure(figsize=(8,4))
     errorP1 = [0, epoca]
     errorP2 = [eP ,eP]
 
@@ -156,21 +156,21 @@ def tensorFlow1(X, Y, eP):
     print("W: ", modelo.get_weights())    
     Yc_TENSOR = modelo.predict(X)
     
-    plt.plot(errorP1,errorP2, label='e permisible ')
-    plt.plot(histor.history["loss"], label='e tensorflow')
+
+    return [Yc_TENSOR, errorP1, errorP2, histor.history["loss"]]
+
+def graficarTensor(errorP1, errorP2, eTensor):
+    print("Grafica tensor")
+    grafiTensor = plt.figure(figsize=(8,5))
+    plt.plot(errorP1, errorP2, label='error permisible ')
+    plt.plot(eTensor, label='error tensorflow')
     plt.title("Tensor")
-
+    plt.legend()
     plt.show()
-
-    return Yc_TENSOR
 
 
 def graficar(epocaX, eEpocaY, eP, epoca, W):
-    print("Graficar: \n")
-
-    #print(len(epocaX), len(eEpocaY))
-    #print(epocaX)
-    #print(eEpocaY)
+    print("Graficar: \n")    
 
     errorP1 = [0, epoca]
     errorP2 = [eP ,eP]
@@ -179,7 +179,7 @@ def graficar(epocaX, eEpocaY, eP, epoca, W):
     plt.plot(epocaX,eEpocaY, label='error linalg ')
     plt.plot(errorP1,errorP2, label='error permisible ')
     plt.title("Lin alg")
-    plt.legend()            
+    plt.legend()
     plt.show()
     
     return W
@@ -196,9 +196,9 @@ def graficarComparacion(epoca, yD, yCl, yCt): # yCt
 
     grafiLin = plt.figure(figsize=(8,4))
 
-    plt.plot(epoca,yCt, label='YC tensor')
-    plt.plot(epoca,yCl, label='YC linalg ')
     plt.plot(epoca,yD, label='YD ')
+    plt.plot(epoca,yCl, label='YC linalg ')
+    plt.plot(epoca,yCt, label='YC tensor')
 
     plt.title("Comparacion")
     plt.legend()            
