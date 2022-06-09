@@ -7,6 +7,9 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
+
+YC_TENSOR = []
+
 def inicializarDatos(datosCsv):
     print(" inicializarDatos() ")
     X = np.array(datosCsv["X"], dtype=float)
@@ -21,9 +24,24 @@ def inicializarDatos(datosCsv):
 
     print(W[0])
 
-    operacionNeurona(X, Y, W, N, eP)
+    datosGraficar = operacionNeurona(X, Y, W, N, eP)
+
+    #comparacion = {"Epoca": epocas, "Y": Y, "YcFinal": YcFinal}    
+    #graficarLinAlg = {"Epocas": epocas, "eEpoca": errorAprendizajeEpoca, "eP":eP, "cont": cont, "W": W}
+
+    """ datosGraficar[0]["Epocas"]
+    datosGraficar[0]["Y"]
+    datosGraficar[0]["YcFinal"] """
     
-    tensorFlow1(datosCsv["X"], datosCsv["Y"], eP)
+    """ datosGraficar[1]["Epocas"]
+    datosGraficar[1]["eEpoca"]
+    datosGraficar[1]["eP"]
+    datosGraficar[1]["cont"]
+    datosGraficar[1]["W"] """
+    
+    ycTensor = tensorFlow1(datosCsv["X"], datosCsv["Y"], eP)
+    graficar(datosGraficar[1]["Epocas"] , datosGraficar[1]["eEpoca"], datosGraficar[1]["eP"], datosGraficar[1]["cont"], datosGraficar[1]["W"])
+    graficarComparacion(datosGraficar[0]["Epoca"], datosGraficar[0]["Y"] ,datosGraficar[0]["YcFinal"], ycTensor)
 
     return "vacio"
 
@@ -37,6 +55,7 @@ def operacionNeurona(X, Y, W, N, eP):
     epocas = []
     errorAprendizajeEpoca = []
     error = 0
+    YcFinal = []
 
     while cont < 100:
 
@@ -51,6 +70,8 @@ def operacionNeurona(X, Y, W, N, eP):
         #print(bT)
         #print("Yc / U: -----------------------------------------------\n")
         Yc = np.dot(X,bT)
+        YcFinal = Yc
+        
         #print("\n")
         
         #print(Yc)
@@ -105,16 +126,17 @@ def operacionNeurona(X, Y, W, N, eP):
     print("\nPesos finales:\n")
     print(W)
     
-    return graficar(epocas, errorAprendizajeEpoca, eP, cont, W)
+    comparacion = {"Epoca": epocas, "Y": Y, "YcFinal": YcFinal}
+    #graficarComparacion(epocas, Y ,YcFinal)
+    graficarLinAlg = {"Epocas": epocas, "eEpoca": errorAprendizajeEpoca, "eP":eP, "cont": cont, "W": W}
+    
+    return [comparacion, graficarLinAlg]
 
 def tensorFlow1(X, Y, eP):
+
     epoca = 100
     print("Tensor:\n")
 
-    """ print("\nX::")
-    print(X)
-    print("\nY::")
-    print(Y) """
     capa = tf.keras.layers.Dense(units=1, input_shape=[5])
         
     modelo = tf.keras.Sequential([capa])    
@@ -126,21 +148,21 @@ def tensorFlow1(X, Y, eP):
     histor = modelo.fit(np.array(X, float), np.array(Y, float), epochs=epoca, verbose=False)    
     
     grafiTensor = plt.figure(figsize=(8,4))
-    plt.plot(histor.history["loss"], label='error tensorflow ')
     errorP1 = [0, epoca]
     errorP2 = [eP ,eP]
-    plt.plot(errorP1,errorP2, label='error permisible ')
 
     puntos = modelo.evaluate(X, Y)
-    print(f"Error: {puntos}")
+    print(f"e: {puntos}")    
+    print("W: ", modelo.get_weights())    
+    Yc_TENSOR = modelo.predict(X)
     
-    print("Pesos: ", modelo.get_weights())
+    plt.plot(errorP1,errorP2, label='e permisible ')
+    plt.plot(histor.history["loss"], label='e tensorflow')
     plt.title("Tensor")
 
     plt.show()
 
-
-
+    return Yc_TENSOR
 
 
 def graficar(epocaX, eEpocaY, eP, epoca, W):
@@ -161,6 +183,28 @@ def graficar(epocaX, eEpocaY, eP, epoca, W):
     plt.show()
     
     return W
+
+
+def graficarComparacion(epoca, yD, yCl, yCt): # yCt
+    print("Graficar comparacion: \n")
+
+    print(yD)
+    print("\n______________\n")
+    print(yCl)
+    print("\n______________\n")
+    print(yCt)
+
+    grafiLin = plt.figure(figsize=(8,4))
+
+    plt.plot(epoca,yCt, label='YC tensor')
+    plt.plot(epoca,yCl, label='YC linalg ')
+    plt.plot(epoca,yD, label='YD ')
+
+    plt.title("Comparacion")
+    plt.legend()            
+    plt.show()
+    
+    #return "xd"
 
 
     
